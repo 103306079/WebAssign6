@@ -258,6 +258,14 @@
                     // update vue to login status
                     vm.$set(vm.data, "currentUser", userData)
 
+                    favoritesRef.on("value", function(favSnapshot) {
+                        favSnapshot.forEach(function(favSnapshot) {
+                            var fav = favSnapshot.val()
+                            console.log("fav value", fav)
+                            vm.$set(vm.data, "favorites", fav)
+                        })
+                    })
+
                 } else {
                     // update vue to logout status
                     vm.$set(vm.data, "currentUser", null)
