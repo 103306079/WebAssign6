@@ -205,7 +205,8 @@
 
             toggle_like: function(activity_id) {
                 // ASN REQ 4 : update favoritesRef at `currentUser.uid ` at `activity_id` to true
-                favoritesRef.child(this.data.currentUser.uid).child(activity_id).set(true).catch(errorCallback)
+                var vm = this
+                favoritesRef.child(vm.data.currentUser.uid).child(activity_id).set(true).catch(errorCallback)
 
             },
 
