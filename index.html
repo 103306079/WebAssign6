@@ -13,7 +13,7 @@
         <nav class="container">
             <h1 class="pull-left">獨立音樂活動清單</h1>
             <div class="pull-right">
-                <span class="glyphicon glyphicon-plus" data-toggle="modal" data-target="#activityEditor" @click="editorCreateActivity()"></span>
+                <span v-if="data.currentUser" class="glyphicon glyphicon-plus" data-toggle="modal" data-target="#activityEditor" @click="editorCreateActivity()"></span>
                 <span v-if="data.currentUser"><img :src="data.currentUser.photoURL" alt="" width="30" height="30"></span>
                 <span v-if="data.currentUser" class="glyphicon glyphicon glyphicon-off" @click="logout()"></span>
                 <span v-else class="glyphicon glyphicon-user" @click="login()"></span>
@@ -41,8 +41,8 @@
                         <dd>{{activity.address}}</dd>
                     </dl>
                     <footer>
-                        <span class="bn glyphicon glyphicon-pencil" @click="editorEditActivity( activity_id , activity )" data-toggle="modal" data-target="#activityEditor"></span>
-                        <span class="bn glyphicon glyphicon-remove" @click="removeActivity( activity_id )"></span>
+                        <span v-if="data.currentUser" class="bn glyphicon glyphicon-pencil" @click="editorEditActivity( activity_id , activity )" data-toggle="modal" data-target="#activityEditor"></span>
+                        <span v-if="data.currentUser" class="bn glyphicon glyphicon-remove" @click="removeActivity( activity_id )"></span>
                     </footer>
                 </article>
             </div>
@@ -206,7 +206,7 @@
             toggle_like: function(activity_id) {
                 // ASN REQ 4 : update favoritesRef at `currentUser.uid ` at `activity_id` to true
                 var vm = this
-                favoritesRef.child(vm.data.currentUser.uid).child(activity_id).set(true).catch(errorCallback)
+                favoritesRef.child(vm.data.currentUser.uid).child(activity_id).set(true).catch(errorCallback);
 
             },
 
@@ -231,13 +231,13 @@
             // listen on chages on activities data , and set it to vm.data.activities
             var vm = this;
 
-            activitiesRef.on("value", function(actSnapshot) {
-                actSnapshot.forEach(function(actSnapshot) {
-                    var act = actSnapshot.val()
-                    console.log("act value", act)
-                    vm.$set(vm.data.activities, actSnapshot.key, act)
-                })
-            })
+            activitiesRef.on("value", function(actsSnapshot) {
+                            actsSnapshot.forEach(function(actSnapshot) {
+                                // setup login status
+                                var act = actSnapshot.val();
+                                vm.$set(vm.data.activities, actSnapshot.key, act);
+                            })
+                        })
 
             // ASN REQ 3 : detect authentication changes :
             // if login :
@@ -259,11 +259,14 @@
                     // update vue to login status
                     vm.$set(vm.data, "currentUser", userData)
 
-                    favoritesRef.on("value", function(favSnapshot) {
-                        favSnapshot.forEach(function(favSnapshot) {
-                            var fav = favSnapshot.val()
-                            console.log("fav value", fav)
-                            vm.$set(vm.data, "favorites", fav)
+                    favoritesRef.on("value", function(favsSnapshot) {
+                        favsSnapshot.forEach(function(favSnapshot) {
+                            var fav = favSnapshot.val();
+                            // console.log("fav value", fav);
+                            if(favSnapshot.key===vm.data.currentUser.uid){
+                              vm.$set(vm.data, "favorites", fav);
+                            }
+
                         })
                     })
 
